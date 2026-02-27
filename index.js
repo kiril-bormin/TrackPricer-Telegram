@@ -1,8 +1,9 @@
+require("dotenv").config();
 const { Telegraf } = require("telegraf");
 const axios = require("axios");
 
-const TOKEN = "8365267679:AAGNr_3RLI4g1iSVmLdnxK36F5jXNlhyEdY";
-const bot = new Telegraf(TOKEN);
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const bot = new Telegraf(BOT_TOKEN);
 
 let monChatId = null;
 let seuilAlerte = 90000;
@@ -74,7 +75,9 @@ async function checkLoop() {
   console.log("Vérification du prix...");
   if (!monChatId) return;
   const currentPrice = await getLastPrice();
-  if (currentPrice && currentPrice.valeur <= seuilAlerte) {
+  console.log(currentPrice);
+
+  if (currentPrice.valeur <= seuilAlerte) {
     bot.telegram.sendMessage(
       monChatId,
       `ALERTE : ${crypto} à ${currentPrice.valeur} $ (Seuil: ${seuilAlerte}$)`,
