@@ -6,17 +6,18 @@ const bot = new Telegraf(TOKEN);
 
 let monChatId = null;
 let seuilAlerte = 90000;
+let crypto = "bitcoin";
 let lastPrice = {
   valeur: null,
   date: null,
 };
 
-async function getBitcoinPrice() {
+async function getCryptoPrice(id) {
   try {
     const res = await axios.get(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+      `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`,
     );
-    lastPrice.valeur = res.data.bitcoin.usd;
+    lastPrice.valeur = res.data[id].usd;
     lastPrice.date = new Date();
     return lastPrice;
   } catch (error) {
@@ -25,10 +26,10 @@ async function getBitcoinPrice() {
 }
 
 async function getLastPrice() {
-  if (new Date() - lastPrice.date < 60000) {
+  if (lastPrice.date && new Date() - lastPrice.date < 60000) {
     return lastPrice;
   } else {
-    const prix = await getBitcoinPrice();
+    const prix = await getCryptoPrice(crypto);
     return prix;
   }
 }
@@ -36,13 +37,14 @@ async function getLastPrice() {
 bot.start((ctx) => {
   monChatId = ctx.chat.id;
   ctx.reply(`Bot activé, seuil: ${seuilAlerte}$`);
+  ctx.reply(`C'est bon ! Votre ID (${monChatId}) est enregistré.`);
 });
 
 bot.command("prix", async (ctx) => {
-  const lastPrice = await getLastPrice();
-  if (lastPrice.valeur) {
+  const currentPrice = await getLastPrice();
+  if (currentPrice && currentPrice.valeur) {
     ctx.reply(
-      `Prix actuel : ${lastPrice.valeur} $ (dernière mise à jour : ${lastPrice.date.toLocaleTimeString()})`,
+      `Prix actuel de ${crypto} : ${currentPrice.valeur} $ (dernière mise à jour : ${currentPrice.date.toLocaleTimeString()})`,
     );
     console.log(
       "message envoyé : " + JSON.stringify(ctx.message.text, null, 2),
@@ -64,14 +66,18 @@ bot.command("set", (ctx) => {
   }
 });
 
+bot.command("choose", async (ctx) => {
+  await ctx.reply("");
+});
+
 async function checkLoop() {
   console.log("Vérification du prix...");
   if (!monChatId) return;
-  const lastPrice = await getLastPrice();
-  if (lastPrice.valeur <= seuilAlerte) {
+  const currentPrice = await getLastPrice();
+  if (currentPrice && currentPrice.valeur <= seuilAlerte) {
     bot.telegram.sendMessage(
       monChatId,
-      `Bitcoin à ${lastPrice.valeur} $ (Seuil: ${seuilAlerte}$)`,
+      `ALERTE : ${crypto} à ${currentPrice.valeur} $ (Seuil: ${seuilAlerte}$)`,
     );
   }
 }
@@ -79,7 +85,7 @@ async function checkLoop() {
 setInterval(checkLoop, 60000);
 
 bot.telegram.deleteWebhook().then(() => {
-  bot.launch();
+  bot.launch().then(() => console.log("Bot lancé !"));
 });
 
 process.once("SIGINT", () => bot.stop("SIGINT"));
