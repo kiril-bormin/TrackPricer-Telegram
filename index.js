@@ -67,9 +67,7 @@ bot.command("set", (ctx) => {
   }
 });
 
-bot.command("choose", async (ctx) => {
-  await ctx.reply("");
-});
+bot.command("crypto", async (ctx) => {});
 
 async function checkLoop() {
   console.log("Vérification du prix...");
