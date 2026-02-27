@@ -80,7 +80,7 @@ async function checkLoop() {
   if (currentPrice.valeur <= seuilAlerte) {
     bot.telegram.sendMessage(
       monChatId,
-      `ALERTE : ${crypto} à ${currentPrice.valeur} $ (Seuil: ${seuilAlerte}$)`,
+      `ALERTE : ${crypto} à ${currentPrice.valeur} $ (Seuil : ${seuilAlerte}$)`,
     );
   }
 }
