@@ -38,7 +38,6 @@ async function getLastPrice() {
 bot.start((ctx) => {
   monChatId = ctx.chat.id;
   ctx.reply(`Bot activé, seuil: ${seuilAlerte}$`);
-  ctx.reply(`C'est bon ! Votre ID (${monChatId}) est enregistré.`);
 });
 
 bot.command("prix", async (ctx) => {
