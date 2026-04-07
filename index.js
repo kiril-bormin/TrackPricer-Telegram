@@ -12,6 +12,7 @@ let lastPrice = {
   valeur: null,
   date: null,
 };
+let alerteEnvoyee = false;
 
 async function getCryptoPrice(id) {
   try {
@@ -73,11 +74,19 @@ async function checkLoop() {
   if (!monChatId) return;
   const currentPrice = await getLastPrice();
   console.log(currentPrice);
-
-  if (currentPrice.valeur <= seuilAlerte) {
+  if (!currentPrice || !currentPrice.valeur) return;
+  if (currentPrice.valeur <= seuilAlerte && !alerteEnvoyee) {
     bot.telegram.sendMessage(
       monChatId,
-      `ALERTE : ${crypto} à ${currentPrice.valeur} $ (Seuil : ${seuilAlerte}$)`,
+      `🚨 ALERTE : ${crypto} à ${currentPrice.valeur} $ (Seuil : ${seuilAlerte}$)`,
+    );
+    alerteEnvoyee = true;
+  } else if (currentPrice.valeur > seuilAlerte && alerteEnvoyee) {
+    alerteEnvoyee = false;
+
+    bot.telegram.sendMessage(
+      monChatId,
+      `✅ INFO : ${crypto} est remonté au-dessus du seuil de ${seuilAlerte}$ (Prix : ${currentPrice.valeur}$). Alerte réarmée.`,
     );
   }
 }
