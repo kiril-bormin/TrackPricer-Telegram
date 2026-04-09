@@ -63,14 +63,25 @@ bot.command("prix", async (ctx) => {
 
 bot.command("set", (ctx) => {
   const args = ctx.message.text.split(" ");
-  const val = parseFloat(args[1]);
-  if (!isNaN(val)) {
-    seuilAlerte = val;
-    monChatId = ctx.chat.id;
-    ctx.reply(`Nouveau seuil : ${seuilAlerte} $`);
-  } else {
-    ctx.reply("Format invalide. Utilisez /set <valeur>");
+  if (args.length < 2) {
+    return ctx.reply("Format invalide. Utilise /set <valeur>");
   }
+  const val = Number(args[1]);
+
+  if (!Number.isFinite(val) || val <= 0) {
+    return ctx.reply(
+      "Valeur invalide. Entrez un nombre positif, ex: /set 10000",
+    );
+  }
+  if (val > 10_000_000) {
+    return ctx.reply(
+      `Valeur trop grande, utilisez une valeur plus petite que 10 millions, ex: /set 10000`,
+    );
+  }
+
+  seuilAlerte = val;
+  monChatId = ctx.chat.id;
+  ctx.reply(`Nouveau seuil : ${seuilAlerte} $`);
 });
 
 bot.command("crypto", async (ctx) => {
