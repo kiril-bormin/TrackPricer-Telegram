@@ -48,8 +48,8 @@ bot.start((ctx) => {
 bot.command("prix", async (ctx) => {
   const currentPrice = await getLastPrice();
   if (currentPrice && currentPrice.valeur) {
-    ctx.reply(
-      `Prix actuel de ${crypto} : ${currentPrice.valeur} $ (dernière mise à jour : ${currentPrice.date.toLocaleTimeString()})`,
+    ctx.replyWithHTML(
+      `Prix actuel de <b>${crypto.charAt(0).toUpperCase() + crypto.slice(1)}</b> - ${currentPrice.valeur} $ (dernière mise à jour : ${currentPrice.date.toLocaleTimeString()})`,
     );
     console.log(
       "message envoyé : " + JSON.stringify(ctx.message.text, null, 2),
