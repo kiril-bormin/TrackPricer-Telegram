@@ -91,7 +91,11 @@ bot.command("crypto", async (ctx) => {
   alerteEnvoyee = false;
   monChatId = ctx.chat.id;
 
-  return ctx.reply("Crypto suivie mise à jour: " + crypto);
+  return ctx.reply(
+    "Crypto suivie mise à jour: " +
+      crypto.charAt(0).toUpperCase() +
+      crypto.slice(1),
+  );
 });
 
 async function checkLoop() {
