@@ -71,7 +71,28 @@ bot.command("set", (ctx) => {
   }
 });
 
-bot.command("crypto", async (ctx) => {});
+bot.command("crypto", async (ctx) => {
+  const args = ctx.message.text.trim().split(/\s+/);
+  const newCrypto = (args[1] || "").toLowerCase();
+
+  if (!newCrypto) {
+    return ctx.reply("Format invalide. Utilisez /crypto <nom_de_la_crypto>");
+  }
+
+  const testPrice = await getCryptoPrice(newCrypto);
+  if (!testPrice || typeof testPrice.valeur !== "number") {
+    return ctx.reply(
+      "Crypto inconnue. Utiliser par exemple: bitcoin, ethereum, solana",
+    );
+  }
+
+  crypto = newCrypto;
+  lastPrice = { valeur: null, date: null };
+  alerteEnvoyee = false;
+  monChatId = ctx.chat.id;
+
+  return ctx.reply("Crypto suivie mise à jour: " + crypto);
+});
 
 async function checkLoop() {
   console.log("Vérification du prix...");
