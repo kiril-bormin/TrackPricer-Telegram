@@ -17,6 +17,7 @@ let lastPrice = {
   date: null,
 };
 let alerteEnvoyee = false;
+let isChecking = false;
 
 async function getCryptoPrice(id) {
   try {
@@ -36,6 +37,7 @@ async function getLastPrice() {
     return lastPrice;
   } else {
     const prix = await getCryptoPrice(crypto);
+    isChecking = true;
     return prix;
   }
 }
@@ -99,24 +101,31 @@ bot.command("crypto", async (ctx) => {
 });
 
 async function checkLoop() {
-  console.log("Vérification du prix...");
-  if (!monChatId) return;
-  const currentPrice = await getLastPrice();
-  console.log(currentPrice);
-  if (!currentPrice || !currentPrice.valeur) return;
-  if (currentPrice.valeur <= seuilAlerte && !alerteEnvoyee) {
-    bot.telegram.sendMessage(
-      monChatId,
-      `ALERTE : ${crypto} à ${currentPrice.valeur} $ (Seuil : ${seuilAlerte}$)`,
-    );
-    alerteEnvoyee = true;
-  } else if (currentPrice.valeur > seuilAlerte && alerteEnvoyee) {
-    alerteEnvoyee = false;
+  if (isChecking) return;
+  isChecking = true;
 
-    bot.telegram.sendMessage(
-      monChatId,
-      `INFO : ${crypto} est remonté au-dessus du seuil de ${seuilAlerte}$ (Prix : ${currentPrice.valeur}$). Alerte réarmée.`,
-    );
+  try {
+    console.log("Verification du prix...");
+    if (!monChatId) return;
+
+    const currentPrice = await getLastPrice();
+    if (!currentPrice || !currentPrice.valeur) return;
+
+    if (currentPrice.valeur <= seuilAlerte && !alerteEnvoyee) {
+      await bot.telegram.sendMessage(
+        monChatId,
+        `ALERTE : ${crypto} a ${currentPrice.valeur} $ (Seuil : ${seuilAlerte}$)`,
+      );
+      alerteEnvoyee = true;
+    } else if (currentPrice.valeur > seuilAlerte && alerteEnvoyee) {
+      alerteEnvoyee = false;
+      await bot.telegram.sendMessage(
+        monChatId,
+        `INFO : ${crypto} est remonte au-dessus du seuil de ${seuilAlerte}$ (Prix : ${currentPrice.valeur}$).`,
+      );
+    }
+  } finally {
+    isChecking = false;
   }
 }
 
