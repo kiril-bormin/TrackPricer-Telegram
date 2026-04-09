@@ -3,6 +3,10 @@ const { Telegraf } = require("telegraf");
 const axios = require("axios");
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
+if (!BOT_TOKEN) {
+  console.error("erreur - token n'est pas defini");
+  process.exit(1);
+}
 const bot = new Telegraf(BOT_TOKEN);
 
 let monChatId = null;
@@ -78,7 +82,7 @@ async function checkLoop() {
   if (currentPrice.valeur <= seuilAlerte && !alerteEnvoyee) {
     bot.telegram.sendMessage(
       monChatId,
-      `🚨 ALERTE : ${crypto} à ${currentPrice.valeur} $ (Seuil : ${seuilAlerte}$)`,
+      `ALERTE : ${crypto} à ${currentPrice.valeur} $ (Seuil : ${seuilAlerte}$)`,
     );
     alerteEnvoyee = true;
   } else if (currentPrice.valeur > seuilAlerte && alerteEnvoyee) {
@@ -86,7 +90,7 @@ async function checkLoop() {
 
     bot.telegram.sendMessage(
       monChatId,
-      `✅ INFO : ${crypto} est remonté au-dessus du seuil de ${seuilAlerte}$ (Prix : ${currentPrice.valeur}$). Alerte réarmée.`,
+      `INFO : ${crypto} est remonté au-dessus du seuil de ${seuilAlerte}$ (Prix : ${currentPrice.valeur}$). Alerte réarmée.`,
     );
   }
 }
